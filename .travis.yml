@@ -5,6 +5,7 @@ go:
   - 1.14
   - master
 script:
+  - go install
   - ~/go/bin/golangci-lint run ./...
   - |
       if [ `gofmt -l . | head -1` ]; then
