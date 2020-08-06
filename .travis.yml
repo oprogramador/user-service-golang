@@ -1,0 +1,17 @@
+sudo: false
+language: go
+go:
+  - 1.x
+  - 1.14
+  - master
+script:
+  - ~/go/bin/golangci-lint run ./...
+  - |
+      if [ `gofmt -l . | head -1` ]; then
+        echo "you must run 'go fmt ./...' to fix formatting"
+        exit 1
+      fi
+notifications:
+  email:
+    on_success: never
+    on_failure: always

@@ -55,7 +55,10 @@ func createUser(ctx context.Context, usersCollection *mongo.Collection) func(gin
 		defer cursor.Close(ctx)
 		reqBody, _ := ioutil.ReadAll(ginContext.Request.Body)
 		var user User
-		json.Unmarshal(reqBody, &user)
+		err = json.Unmarshal(reqBody, &user)
+		if err != nil {
+			log.Fatalln(err)
+		}
 		log.Println("user", user)
 
 		data, err := usersCollection.InsertOne(ctx, bson.D{
@@ -88,7 +91,17 @@ func handleRequests(port string, ctx context.Context, usersCollection *mongo.Col
 	router.GET("/users", listUsers(ctx, usersCollection))
 	router.POST("/user", createUser(ctx, usersCollection))
 	router.DELETE("/user/:id", deleteUser(ctx, usersCollection))
-	router.Run(":" + port)
+	err := router.Run(":" + port)
+	if err != nil {
+		log.Fatalln(err)
+	}
+}
+
+func disconnect(client *mongo.Client, ctx context.Context) {
+	err := client.Disconnect(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func main() {
@@ -97,12 +110,13 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	ctx, _ := context.WithTimeout(context.Background(), 120*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+	defer cancel()
 	err = client.Connect(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer client.Disconnect(ctx)
+	defer disconnect(client, ctx)
 
 	usersDatabase := client.Database("users")
 	usersCollection := usersDatabase.Collection("users")
