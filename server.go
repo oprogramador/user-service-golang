@@ -3,13 +3,13 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"io/ioutil"
 	"log"
-	"net/http"
 	"time"
 )
 
@@ -18,8 +18,8 @@ type User struct {
 	Active bool   `json:"active"`
 }
 
-func listUsers(ctx context.Context, usersCollection *mongo.Collection) func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
+func listUsers(ctx context.Context, usersCollection *mongo.Collection) func(ginContext *gin.Context) {
+	return func(ginContext *gin.Context) {
 		cursor, err := usersCollection.Find(ctx, bson.D{})
 		if err != nil {
 			log.Fatalln(err)
@@ -32,24 +32,28 @@ func listUsers(ctx context.Context, usersCollection *mongo.Collection) func(w ht
 			if err != nil {
 				log.Fatalln(err)
 			}
-			log.Println("users", result)
+			log.Println("result", result)
 			users = append(users, result)
 		}
 		if err := cursor.Err(); err != nil {
 			log.Fatal(err)
 		}
-		json.NewEncoder(w).Encode(users)
+		responseString, err := json.Marshal(users)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		ginContext.String(200, string(responseString))
 	}
 }
 
-func createUser(ctx context.Context, usersCollection *mongo.Collection) func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
+func createUser(ctx context.Context, usersCollection *mongo.Collection) func(ginContext *gin.Context) {
+	return func(ginContext *gin.Context) {
 		cursor, err := usersCollection.Find(ctx, bson.D{})
 		if err != nil {
 			log.Fatalln(err)
 		}
 		defer cursor.Close(ctx)
-		reqBody, _ := ioutil.ReadAll(r.Body)
+		reqBody, _ := ioutil.ReadAll(ginContext.Request.Body)
 		var user User
 		json.Unmarshal(reqBody, &user)
 		log.Println("user", user)
@@ -62,9 +66,9 @@ func createUser(ctx context.Context, usersCollection *mongo.Collection) func(w h
 	}
 }
 
-func deleteUser(ctx context.Context, usersCollection *mongo.Collection) func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		id := r.URL.Query()["id"][0]
+func deleteUser(ctx context.Context, usersCollection *mongo.Collection) func(ginContext *gin.Context) {
+	return func(ginContext *gin.Context) {
+		id := ginContext.Param("id")
 		log.Println("delete", id)
 
 		idPrimitive, err := primitive.ObjectIDFromHex(id)
@@ -80,10 +84,11 @@ func deleteUser(ctx context.Context, usersCollection *mongo.Collection) func(w h
 }
 
 func handleRequests(port string, ctx context.Context, usersCollection *mongo.Collection) {
-	http.HandleFunc("/users", listUsers(ctx, usersCollection))
-	http.HandleFunc("/user", createUser(ctx, usersCollection))
-	http.HandleFunc("/delete-user", deleteUser(ctx, usersCollection))
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	router := gin.Default()
+	router.GET("/users", listUsers(ctx, usersCollection))
+	router.POST("/user", createUser(ctx, usersCollection))
+	router.DELETE("/user/:id", deleteUser(ctx, usersCollection))
+	router.Run(":" + port)
 }
 
 func main() {
