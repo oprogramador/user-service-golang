@@ -6,7 +6,7 @@ go:
   - master
 script:
   - go install
-  - ~/go/bin/golangci-lint run ./...
+  - golangci-lint run ./...
   - |
       if [ `gofmt -l . | head -1` ]; then
         echo "you must run 'go fmt ./...' to fix formatting"
