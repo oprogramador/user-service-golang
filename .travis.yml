@@ -6,7 +6,7 @@ go:
   - master
 script:
   - go mod download
-  - `go env GOPATH`/bin/golangci-lint run ./...
+  - $(go env GOPATH)/bin/golangci-lint run ./...
   - |
       if [ `gofmt -l . | head -1` ]; then
         echo "you must run 'go fmt ./...' to fix formatting"
