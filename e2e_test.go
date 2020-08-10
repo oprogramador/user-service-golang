@@ -65,7 +65,7 @@ func TestAddingReadingAddDeleting(t *testing.T) {
 }
 
 // Thanks to that, DELETE is idempotent
-func TestDeletingNonExistentUserWithValidIdIsPermitted(t *testing.T) {
+func TestDeletingNonExistentUserWithValidId(t *testing.T) {
 	server, _, _, _ := setupServer()
 	ts := httptest.NewServer(server)
 	defer ts.Close()
@@ -81,4 +81,21 @@ func TestDeletingNonExistentUserWithValidIdIsPermitted(t *testing.T) {
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
 	assert.Nil(t, err)
 	assert.Equal(t, "", string(bodyBytes))
+}
+
+func TestDeletingWithInvalidId(t *testing.T) {
+	server, _, _, _ := setupServer()
+	ts := httptest.NewServer(server)
+	defer ts.Close()
+
+	req, err := http.NewRequest(http.MethodDelete, ts.URL+"/user/invalid", nil)
+	assert.Nil(t, err)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+
+	assert.Nil(t, err)
+	assert.Equal(t, 400, resp.StatusCode)
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	assert.Nil(t, err)
+	assert.Equal(t, "invalid id", string(bodyBytes))
 }

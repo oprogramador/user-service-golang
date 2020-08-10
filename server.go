@@ -74,7 +74,7 @@ func deleteUser(ctx context.Context, usersCollection *mongo.Collection) func(gin
 
 		idPrimitive, err := primitive.ObjectIDFromHex(id)
 		if err != nil {
-			log.Fatalln(err)
+			ginContext.String(400, "invalid id")
 		}
 
 		data, err := usersCollection.DeleteOne(ctx, bson.D{
