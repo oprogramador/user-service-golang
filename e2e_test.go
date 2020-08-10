@@ -5,13 +5,12 @@ import (
 	"encoding/json"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
 
-func TestAddingAndReading(t *testing.T) {
+func TestAddingReadingAddDeleting(t *testing.T) {
 	server, _, _, _ := setupServer()
 	ts := httptest.NewServer(server)
 	defer ts.Close()
@@ -23,13 +22,9 @@ func TestAddingAndReading(t *testing.T) {
 	assert.Equal(t, []string{"application/json; charset=utf-8"}, resp.Header["Content-Type"])
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
 	var user User
-	if err != nil {
-		log.Fatal(err)
-	}
+	assert.Nil(t, err)
 	err = json.Unmarshal(bodyBytes, &user)
-	if err != nil {
-		log.Fatal(err)
-	}
+	assert.Nil(t, err)
 	assert.Equal(t, user.Name, "Alan")
 	assert.Equal(t, user.Active, true)
 	assert.Equal(t, len(user.UserID), 24)
@@ -41,12 +36,30 @@ func TestAddingAndReading(t *testing.T) {
 	assert.Equal(t, []string{"application/json; charset=utf-8"}, resp.Header["Content-Type"])
 	bodyBytes, err = ioutil.ReadAll(resp.Body)
 	var users []User
-	if err != nil {
-		log.Fatal(err)
-	}
+	assert.Nil(t, err)
 	err = json.Unmarshal(bodyBytes, &users)
-	if err != nil {
-		log.Fatal(err)
-	}
+	assert.Nil(t, err)
 	assert.Contains(t, users, user)
+
+	req, err := http.NewRequest(http.MethodDelete, ts.URL+"/user/"+user.UserID, nil)
+	assert.Nil(t, err)
+	client := &http.Client{}
+	resp, err = client.Do(req)
+
+	assert.Nil(t, err)
+	assert.Equal(t, 204, resp.StatusCode)
+	bodyBytes, err = ioutil.ReadAll(resp.Body)
+	assert.Nil(t, err)
+	assert.Equal(t, "", string(bodyBytes))
+
+	resp, err = http.Get(ts.URL + "/users")
+
+	assert.Nil(t, err)
+	assert.Equal(t, 200, resp.StatusCode)
+	assert.Equal(t, []string{"application/json; charset=utf-8"}, resp.Header["Content-Type"])
+	bodyBytes, err = ioutil.ReadAll(resp.Body)
+	assert.Nil(t, err)
+	err = json.Unmarshal(bodyBytes, &users)
+	assert.Nil(t, err)
+	assert.NotContains(t, users, user)
 }

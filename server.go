@@ -81,6 +81,7 @@ func deleteUser(ctx context.Context, usersCollection *mongo.Collection) func(gin
 			{Key: "_id", Value: idPrimitive},
 		})
 		log.Println(data, err)
+		ginContext.String(204, "")
 	}
 }
 
