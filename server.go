@@ -14,6 +14,7 @@ import (
 )
 
 type User struct {
+	UserID string `json:"user_id"`
 	Name   string `json:"name"`
 	Active bool   `json:"active"`
 }
@@ -25,24 +26,20 @@ func listUsers(ctx context.Context, usersCollection *mongo.Collection) func(ginC
 			log.Fatalln(err)
 		}
 		defer cursor.Close(ctx)
-		users := []interface{}{}
+		users := []User{}
 		for cursor.Next(ctx) {
 			var result bson.M
 			err := cursor.Decode(&result)
 			if err != nil {
 				log.Fatalln(err)
 			}
-			log.Println("result", result)
-			users = append(users, result)
+			user := User{UserID: result["_id"].(primitive.ObjectID).Hex(), Name: result["Name"].(string), Active: result["Active"].(bool)}
+			users = append(users, user)
 		}
 		if err := cursor.Err(); err != nil {
 			log.Fatal(err)
 		}
-		responseString, err := json.Marshal(users)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		ginContext.String(200, string(responseString))
+		ginContext.JSON(200, users)
 	}
 }
 
@@ -59,13 +56,14 @@ func createUser(ctx context.Context, usersCollection *mongo.Collection) func(gin
 		if err != nil {
 			log.Fatalln(err)
 		}
-		log.Println("user", user)
 
 		data, err := usersCollection.InsertOne(ctx, bson.D{
 			{Key: "Active", Value: user.Active},
 			{Key: "Name", Value: user.Name},
 		})
 		log.Println(data, err)
+		user.UserID = data.InsertedID.(primitive.ObjectID).Hex()
+		ginContext.JSON(201, user)
 	}
 }
 
@@ -86,15 +84,13 @@ func deleteUser(ctx context.Context, usersCollection *mongo.Collection) func(gin
 	}
 }
 
-func handleRequests(port string, ctx context.Context, usersCollection *mongo.Collection) {
+func handleRequests(ctx context.Context, usersCollection *mongo.Collection) *gin.Engine {
 	router := gin.Default()
 	router.GET("/users", listUsers(ctx, usersCollection))
 	router.POST("/user", createUser(ctx, usersCollection))
 	router.DELETE("/user/:id", deleteUser(ctx, usersCollection))
-	err := router.Run(":" + port)
-	if err != nil {
-		log.Fatalln(err)
-	}
+
+	return router
 }
 
 func disconnect(client *mongo.Client, ctx context.Context) {
@@ -104,22 +100,32 @@ func disconnect(client *mongo.Client, ctx context.Context) {
 	}
 }
 
-func main() {
-	port := "10000"
+func setupServer() (*gin.Engine, context.CancelFunc, *mongo.Client, context.Context) {
 	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
 	if err != nil {
 		log.Fatal(err)
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
-	defer cancel()
 	err = client.Connect(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer disconnect(client, ctx)
 
 	usersDatabase := client.Database("users")
 	usersCollection := usersDatabase.Collection("users")
 
-	handleRequests(port, ctx, usersCollection)
+	router := handleRequests(ctx, usersCollection)
+
+	return router, cancel, client, ctx
+}
+
+func main() {
+	port := "10000"
+	router, cancel, client, ctx := setupServer()
+	defer cancel()
+	defer disconnect(client, ctx)
+	err := router.Run(":" + port)
+	if err != nil {
+		log.Fatalln(err)
+	}
 }

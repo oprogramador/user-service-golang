@@ -13,6 +13,7 @@ script:
         echo "you must run 'go fmt ./...' to fix formatting"
         exit 1
       fi
+  - go test
 notifications:
   email:
     on_success: never
