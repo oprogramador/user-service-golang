@@ -63,3 +63,22 @@ func TestAddingReadingAddDeleting(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotContains(t, users, user)
 }
+
+// Thanks to that, DELETE is idempotent
+func TestDeletingNonExistentUserWithValidIdIsPermitted(t *testing.T) {
+	server, _, _, _ := setupServer()
+	ts := httptest.NewServer(server)
+	defer ts.Close()
+
+	nonExistentId := "5f31645773bb1c7661d151ba"
+	req, err := http.NewRequest(http.MethodDelete, ts.URL+"/user/"+nonExistentId, nil)
+	assert.Nil(t, err)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+
+	assert.Nil(t, err)
+	assert.Equal(t, 204, resp.StatusCode)
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	assert.Nil(t, err)
+	assert.Equal(t, "", string(bodyBytes))
+}
