@@ -10,6 +10,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"io/ioutil"
 	"log"
+	"regexp"
+	"strings"
 	"time"
 )
 
@@ -54,7 +56,9 @@ func createUser(ctx context.Context, usersCollection *mongo.Collection) func(gin
 		var user User
 		err = json.Unmarshal(reqBody, &user)
 		if err != nil {
-			log.Fatalln(err)
+			re := regexp.MustCompile(`[A-Za-z.]* of type [A-Za-z]*`)
+			ginContext.String(400, strings.ReplaceAll(string(re.Find([]byte(err.Error()))), "of type", "should be of type"))
+			return
 		}
 
 		data, err := usersCollection.InsertOne(ctx, bson.D{
@@ -75,6 +79,7 @@ func deleteUser(ctx context.Context, usersCollection *mongo.Collection) func(gin
 		idPrimitive, err := primitive.ObjectIDFromHex(id)
 		if err != nil {
 			ginContext.String(400, "invalid id")
+			return
 		}
 
 		data, err := usersCollection.DeleteOne(ctx, bson.D{

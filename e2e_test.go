@@ -99,3 +99,31 @@ func TestDeletingWithInvalidId(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "invalid id", string(bodyBytes))
 }
+
+func TestCreatingUserWithInvalidName(t *testing.T) {
+	server, _, _, _ := setupServer()
+	ts := httptest.NewServer(server)
+	defer ts.Close()
+
+	resp, err := http.Post(ts.URL+"/user", "application/json", bytes.NewBufferString(`{"name":123,"active":true}`))
+
+	assert.Nil(t, err)
+	assert.Equal(t, 400, resp.StatusCode)
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	assert.Nil(t, err)
+	assert.Equal(t, "User.name should be of type string", string(bodyBytes))
+}
+
+func TestCreatingUserWithInvalidActive(t *testing.T) {
+	server, _, _, _ := setupServer()
+	ts := httptest.NewServer(server)
+	defer ts.Close()
+
+	resp, err := http.Post(ts.URL+"/user", "application/json", bytes.NewBufferString(`{"name":"Alan","active":123}`))
+
+	assert.Nil(t, err)
+	assert.Equal(t, 400, resp.StatusCode)
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	assert.Nil(t, err)
+	assert.Equal(t, "User.active should be of type bool", string(bodyBytes))
+}
