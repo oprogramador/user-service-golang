@@ -2,13 +2,13 @@ package controllers
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/gin-gonic/gin"
+	"github.com/oprogramador/user-service-golang/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"github.com/oprogramador/user-service-golang/models"
 	"io/ioutil"
-	"encoding/json"
 	"log"
 	"regexp"
 	"strings"
@@ -39,4 +39,3 @@ func CreateUser(ctx context.Context, usersCollection *mongo.Collection) func(gin
 		ginContext.JSON(201, user)
 	}
 }
-

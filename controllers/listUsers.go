@@ -3,10 +3,10 @@ package controllers
 import (
 	"context"
 	"github.com/gin-gonic/gin"
+	"github.com/oprogramador/user-service-golang/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"github.com/oprogramador/user-service-golang/models"
 	"log"
 )
 
