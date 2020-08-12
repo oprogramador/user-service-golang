@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/oprogramador/user-service-golang/models"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"net/http"
@@ -21,7 +22,7 @@ func TestAddingReadingAddDeleting(t *testing.T) {
 	assert.Equal(t, 201, resp.StatusCode)
 	assert.Equal(t, []string{"application/json; charset=utf-8"}, resp.Header["Content-Type"])
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
-	var user User
+	var user models.User
 	assert.Nil(t, err)
 	err = json.Unmarshal(bodyBytes, &user)
 	assert.Nil(t, err)
@@ -35,7 +36,7 @@ func TestAddingReadingAddDeleting(t *testing.T) {
 	assert.Equal(t, 200, resp.StatusCode)
 	assert.Equal(t, []string{"application/json; charset=utf-8"}, resp.Header["Content-Type"])
 	bodyBytes, err = ioutil.ReadAll(resp.Body)
-	var users []User
+	var users []models.User
 	assert.Nil(t, err)
 	err = json.Unmarshal(bodyBytes, &users)
 	assert.Nil(t, err)
