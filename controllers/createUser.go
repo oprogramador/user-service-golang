@@ -1,20 +1,16 @@
 package controllers
 
 import (
-	"context"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/oprogramador/user-service-golang/models"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 	"io/ioutil"
 	"log"
 	"regexp"
 	"strings"
 )
 
-func CreateUser(ctx context.Context, usersCollection *mongo.Collection) func(ginContext *gin.Context) {
+func CreateUser(userManager UserManager) func(ginContext *gin.Context) {
 	return func(ginContext *gin.Context) {
 		reqBody, _ := ioutil.ReadAll(ginContext.Request.Body)
 		var user models.User
@@ -25,12 +21,11 @@ func CreateUser(ctx context.Context, usersCollection *mongo.Collection) func(gin
 			return
 		}
 
-		data, err := usersCollection.InsertOne(ctx, bson.D{
-			{Key: "Active", Value: user.Active},
-			{Key: "Name", Value: user.Name},
-		})
-		log.Println(data, err)
-		user.UserID = data.InsertedID.(primitive.ObjectID).Hex()
+		err = userManager.Save(&user)
+		if err != nil {
+			log.Println(err)
+			ginContext.String(500, "")
+		}
 		ginContext.JSON(201, user)
 	}
 }

@@ -3,21 +3,13 @@ package main
 import (
 	"context"
 	"github.com/gin-gonic/gin"
-	"github.com/oprogramador/user-service-golang/controllers"
+	"github.com/oprogramador/user-service-golang/datamanager"
+	"github.com/oprogramador/user-service-golang/routing"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"time"
 )
-
-func handleRequests(ctx context.Context, usersCollection *mongo.Collection) *gin.Engine {
-	router := gin.Default()
-	router.GET("/users", controllers.ListUsers(ctx, usersCollection))
-	router.POST("/user", controllers.CreateUser(ctx, usersCollection))
-	router.DELETE("/user/:id", controllers.DeleteUser(ctx, usersCollection))
-
-	return router
-}
 
 func disconnect(client *mongo.Client, ctx context.Context) {
 	err := client.Disconnect(ctx)
@@ -40,7 +32,8 @@ func setupServer() (*gin.Engine, context.CancelFunc, *mongo.Client, context.Cont
 	usersDatabase := client.Database("users")
 	usersCollection := usersDatabase.Collection("users")
 
-	router := handleRequests(ctx, usersCollection)
+	userManager := datamanager.New(usersCollection, ctx)
+	router := routing.HandleRequests(userManager)
 
 	return router, cancel, client, ctx
 }
