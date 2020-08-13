@@ -32,7 +32,7 @@ func setupServer() (*gin.Engine, context.CancelFunc, *mongo.Client, context.Cont
 	usersDatabase := client.Database("users")
 	usersCollection := usersDatabase.Collection("users")
 
-	userManager := datamanager.New(usersCollection, ctx)
+	userManager := datamanager.NewUserManager(usersCollection, ctx)
 	router := routing.HandleRequests(userManager)
 
 	return router, cancel, client, ctx

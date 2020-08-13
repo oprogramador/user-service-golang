@@ -13,7 +13,7 @@ type userManager struct {
 	ctx             context.Context
 }
 
-func New(usersCollection *mongo.Collection, ctx context.Context) *userManager {
+func NewUserManager(usersCollection *mongo.Collection, ctx context.Context) *userManager {
 	this := userManager{usersCollection, ctx}
 	return &this
 }
