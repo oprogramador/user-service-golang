@@ -2,9 +2,9 @@ package datamanager
 
 import (
 	"context"
+	"github.com/google/uuid"
 	"github.com/oprogramador/user-service-golang/models"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -19,21 +19,25 @@ func NewUserManager(usersCollection *mongo.Collection, ctx context.Context) *use
 }
 
 func (this *userManager) Save(user *models.User) error {
-	data, err := this.usersCollection.InsertOne(this.ctx, bson.D{
-		{Key: "Active", Value: user.Active},
-		{Key: "Name", Value: user.Name},
-	})
-	user.UserID = data.InsertedID.(primitive.ObjectID).Hex()
+	if user.UserID == "" {
+		id, err := uuid.NewRandom()
+		if err != nil {
+			return err
+		}
+		user.UserID = id.String()
+	}
+	bsonData := bson.M{
+		"active":  user.Active,
+		"name":    user.Name,
+		"user_id": user.UserID,
+	}
+	_, err := this.usersCollection.InsertOne(this.ctx, bsonData)
 	return err
 }
 
 func (this *userManager) Delete(id string) error {
-	idPrimitive, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return err
-	}
-	_, err = this.usersCollection.DeleteOne(this.ctx, bson.D{
-		{Key: "_id", Value: idPrimitive},
+	_, err := this.usersCollection.DeleteOne(this.ctx, bson.D{
+		{Key: "user_id", Value: id},
 	})
 	return err
 }
@@ -51,7 +55,7 @@ func (this *userManager) FindAll() ([]models.User, error) {
 		if err != nil {
 			return nil, err
 		}
-		user := models.User{UserID: result["_id"].(primitive.ObjectID).Hex(), Name: result["Name"].(string), Active: result["Active"].(bool)}
+		user := models.User{UserID: result["user_id"].(string), Name: result["name"].(string), Active: result["active"].(bool)}
 		users = append(users, user)
 	}
 	if err := cursor.Err(); err != nil {
