@@ -52,7 +52,7 @@ func afterEach() {
 func TestSavingWithCustomId(t *testing.T) {
 	beforeEach()
 	defer afterEach()
-	id := "5f36d6678a1059a2cdb8e0e4"
+	id := "c81dc894-3d59-4f02-b22b-d4ad2cba0610"
 	user := models.User{Name: "Alan", Active: true, UserID: id}
 	err := userManager.Save(&user)
 

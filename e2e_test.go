@@ -71,7 +71,7 @@ func TestDeletingNonExistentUserWithValidId(t *testing.T) {
 	ts := httptest.NewServer(server)
 	defer ts.Close()
 
-	nonExistentId := "5f31645773bb1c7661d151ba"
+	nonExistentId := "b9cbf5db-81b7-4261-92bd-65f04307b553"
 	req, err := http.NewRequest(http.MethodDelete, ts.URL+"/user/"+nonExistentId, nil)
 	assert.Nil(t, err)
 	client := &http.Client{}
