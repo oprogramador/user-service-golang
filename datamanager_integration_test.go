@@ -66,3 +66,20 @@ func TestSavingWithCustomId(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, user, saved)
 }
+
+func TestSavingWithoutCustomId(t *testing.T) {
+	beforeEach()
+	defer afterEach()
+	user := models.User{Name: "Alan", Active: true}
+	err := userManager.Save(&user)
+
+	assert.Nil(t, err)
+	assert.Equal(t, "Alan", user.Name)
+	assert.Equal(t, true, user.Active)
+	assert.Equal(t, 36, len(user.UserID))
+
+	var saved models.User
+	err = usersCollection.FindOne(ctx, bson.M{"user_id": user.UserID}).Decode(&saved)
+	assert.Nil(t, err)
+	assert.Equal(t, user, saved)
+}
