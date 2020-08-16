@@ -8,17 +8,17 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type userManager struct {
+type userManagerStruct struct {
 	usersCollection *mongo.Collection
 	ctx             context.Context
 }
 
-func NewUserManager(usersCollection *mongo.Collection, ctx context.Context) *userManager {
-	this := userManager{usersCollection, ctx}
+func NewUserManager(usersCollection *mongo.Collection, ctx context.Context) *userManagerStruct {
+	this := userManagerStruct{usersCollection, ctx}
 	return &this
 }
 
-func (this *userManager) Save(user *models.User) error {
+func (this *userManagerStruct) Save(user *models.User) error {
 	if user.UserID == "" {
 		id, err := uuid.NewRandom()
 		if err != nil {
@@ -35,14 +35,14 @@ func (this *userManager) Save(user *models.User) error {
 	return err
 }
 
-func (this *userManager) Delete(id string) error {
+func (this *userManagerStruct) Delete(id string) error {
 	_, err := this.usersCollection.DeleteOne(this.ctx, bson.D{
 		{Key: "user_id", Value: id},
 	})
 	return err
 }
 
-func (this *userManager) FindAll() ([]models.User, error) {
+func (this *userManagerStruct) FindAll() ([]models.User, error) {
 	cursor, err := this.usersCollection.Find(this.ctx, bson.D{})
 	if err != nil {
 		return nil, err

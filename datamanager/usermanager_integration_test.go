@@ -1,8 +1,7 @@
-package main
+package datamanager
 
 import (
 	"context"
-	"github.com/oprogramador/user-service-golang/datamanager"
 	"github.com/oprogramador/user-service-golang/models"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
@@ -13,13 +12,7 @@ import (
 	"time"
 )
 
-type UserManager interface {
-	Save(user *models.User) error
-	Delete(id string) error
-	FindAll() ([]models.User, error)
-}
-
-var userManager UserManager
+var userManager *userManagerStruct
 var ctx context.Context
 var cancel context.CancelFunc
 var usersCollection *mongo.Collection
@@ -42,7 +35,7 @@ func beforeEach() {
 	}
 	usersCollection = usersDatabase.Collection("users")
 
-	userManager = datamanager.NewUserManager(usersCollection, ctx)
+	userManager = NewUserManager(usersCollection, ctx)
 }
 
 func afterEach() {
