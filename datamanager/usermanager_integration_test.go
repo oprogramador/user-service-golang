@@ -76,3 +76,19 @@ func TestSavingWithoutCustomId(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, user, saved)
 }
+
+func TestDeletingExistentUser(t *testing.T) {
+	beforeEach()
+	defer afterEach()
+	id := "d9dfc0c3-2bc4-4166-ba86-c7cc2818d554"
+	_, err := usersCollection.InsertOne(ctx, bson.M{"name": "Alan", "active": true, "user_id": id})
+	assert.Nil(t, err)
+
+	err = userManager.Delete(id)
+
+	assert.Nil(t, err)
+	var saved models.User
+	err = usersCollection.FindOne(ctx, bson.M{"user_id": id}).Decode(&saved)
+	assert.Equal(t, "mongo: no documents in result", err.Error())
+	assert.Equal(t, models.User{Name: "", Active: false, UserID: ""}, saved)
+}
