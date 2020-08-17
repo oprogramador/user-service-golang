@@ -102,3 +102,21 @@ func TestDeletingNonExistentUser(t *testing.T) {
 
 	assert.Nil(t, err)
 }
+
+func TestFindingAllUsers(t *testing.T) {
+	beforeEach()
+	defer afterEach()
+	_, err := usersCollection.InsertMany(ctx, []interface{}{
+		bson.M{"name": "Alan", "active": true, "user_id": "d9dfc0c3-2bc4-4166-ba86-c7cc2818d554"},
+		bson.M{"name": "Bob", "active": false, "user_id": "a046585f-f629-4c32-8ab9-e27d2cefd566"},
+	})
+	assert.Nil(t, err)
+
+	results, err := userManager.FindAll()
+
+	assert.Nil(t, err)
+	assert.Equal(t, []models.User{
+		models.User{Name: "Alan", Active: true, UserID: "d9dfc0c3-2bc4-4166-ba86-c7cc2818d554"},
+		models.User{Name: "Bob", Active: false, UserID: "a046585f-f629-4c32-8ab9-e27d2cefd566"},
+	}, results)
+}
