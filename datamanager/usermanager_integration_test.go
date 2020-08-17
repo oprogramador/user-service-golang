@@ -120,3 +120,13 @@ func TestFindingAllUsers(t *testing.T) {
 		models.User{Name: "Bob", Active: false, UserID: "a046585f-f629-4c32-8ab9-e27d2cefd566"},
 	}, results)
 }
+
+func TestFindingEmptyListofUsers(t *testing.T) {
+	beforeEach()
+	defer afterEach()
+
+	results, err := userManager.FindAll()
+
+	assert.Nil(t, err)
+	assert.Equal(t, []models.User{}, results)
+}
