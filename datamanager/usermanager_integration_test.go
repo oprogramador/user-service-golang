@@ -92,3 +92,13 @@ func TestDeletingExistentUser(t *testing.T) {
 	assert.Equal(t, "mongo: no documents in result", err.Error())
 	assert.Equal(t, models.User{Name: "", Active: false, UserID: ""}, saved)
 }
+
+func TestDeletingNonExistentUser(t *testing.T) {
+	beforeEach()
+	defer afterEach()
+	id := "non-existent"
+
+	err := userManager.Delete(id)
+
+	assert.Nil(t, err)
+}
