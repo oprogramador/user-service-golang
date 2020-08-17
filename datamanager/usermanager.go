@@ -42,7 +42,7 @@ func (this *userManagerStruct) Delete(id string) error {
 	return err
 }
 
-func (this *userManagerStruct) FindAll() ([]models.User, error) {
+func (this *userManagerStruct) Find() ([]models.User, error) {
 	cursor, err := this.usersCollection.Find(this.ctx, bson.D{})
 	if err != nil {
 		return nil, err

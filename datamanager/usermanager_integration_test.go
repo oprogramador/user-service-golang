@@ -112,7 +112,7 @@ func TestFindingAllUsers(t *testing.T) {
 	})
 	assert.Nil(t, err)
 
-	results, err := userManager.FindAll()
+	results, err := userManager.Find()
 
 	assert.Nil(t, err)
 	assert.Equal(t, []models.User{
@@ -125,7 +125,7 @@ func TestFindingEmptyListofUsers(t *testing.T) {
 	beforeEach()
 	defer afterEach()
 
-	results, err := userManager.FindAll()
+	results, err := userManager.Find()
 
 	assert.Nil(t, err)
 	assert.Equal(t, []models.User{}, results)

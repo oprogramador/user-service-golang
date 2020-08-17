@@ -7,5 +7,5 @@ import (
 type UserManager interface {
 	Save(user *models.User) error
 	Delete(id string) error
-	FindAll() ([]models.User, error)
+	Find() ([]models.User, error)
 }
