@@ -130,3 +130,23 @@ func TestFindingEmptyListofUsers(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, []models.User{}, results)
 }
+
+func TestFilteringByActive(t *testing.T) {
+	beforeEach()
+	defer afterEach()
+	_, err := usersCollection.InsertMany(ctx, []interface{}{
+		bson.M{"name": "Alan", "active": true, "user_id": "d9dfc0c3-2bc4-4166-ba86-c7cc2818d554"},
+		bson.M{"name": "Bob", "active": false, "user_id": "a046585f-f629-4c32-8ab9-e27d2cefd566"},
+		bson.M{"name": "Cindy", "active": true, "user_id": "bffb99c8-655b-47ff-9513-70eac0d4d3f4"},
+		bson.M{"name": "Dave", "active": false, "user_id": "0e459353-fe00-4a21-a3ff-3524f5f6f616"},
+	})
+	assert.Nil(t, err)
+
+	results, err := userManager.Find(map[string]interface{}{"active": true})
+
+	assert.Nil(t, err)
+	assert.Equal(t, []models.User{
+		models.User{Name: "Alan", Active: true, UserID: "d9dfc0c3-2bc4-4166-ba86-c7cc2818d554"},
+		models.User{Name: "Cindy", Active: true, UserID: "bffb99c8-655b-47ff-9513-70eac0d4d3f4"},
+	}, results)
+}

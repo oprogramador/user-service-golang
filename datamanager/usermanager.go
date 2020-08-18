@@ -42,8 +42,12 @@ func (this *userManagerStruct) Delete(id string) error {
 	return err
 }
 
-func (this *userManagerStruct) Find() ([]models.User, error) {
-	cursor, err := this.usersCollection.Find(this.ctx, bson.D{})
+func (this *userManagerStruct) Find(params ...map[string]interface{}) ([]models.User, error) {
+	query := bson.M{}
+	if len(params) > 0 {
+		query = bson.M{"active": params[0]["active"].(bool)}
+	}
+	cursor, err := this.usersCollection.Find(this.ctx, query)
 	if err != nil {
 		return nil, err
 	}
