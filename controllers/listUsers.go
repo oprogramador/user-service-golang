@@ -2,10 +2,11 @@ package controllers
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/oprogramador/user-service-golang/datamanagerinterfaces"
 	"log"
 )
 
-func ListUsers(userManager UserManager) func(ginContext *gin.Context) {
+func ListUsers(userManager datamanagerinterfaces.UserManager) func(ginContext *gin.Context) {
 	return func(ginContext *gin.Context) {
 		users, err := userManager.Find()
 		if err != nil {

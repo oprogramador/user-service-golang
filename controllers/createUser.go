@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
+	"github.com/oprogramador/user-service-golang/datamanagerinterfaces"
 	"github.com/oprogramador/user-service-golang/models"
 	"io/ioutil"
 	"log"
@@ -10,7 +11,7 @@ import (
 	"strings"
 )
 
-func CreateUser(userManager UserManager) func(ginContext *gin.Context) {
+func CreateUser(userManager datamanagerinterfaces.UserManager) func(ginContext *gin.Context) {
 	return func(ginContext *gin.Context) {
 		reqBody, _ := ioutil.ReadAll(ginContext.Request.Body)
 		var user models.User

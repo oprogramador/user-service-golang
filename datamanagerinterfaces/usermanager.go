@@ -1,4 +1,4 @@
-package controllers
+package datamanagerinterfaces
 
 import (
 	"github.com/oprogramador/user-service-golang/models"
