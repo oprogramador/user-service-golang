@@ -1,5 +1,11 @@
 package main
 
+/*
+ * these tests are independent on database engine
+ * so after replacing it into another one,
+ * they will be still passing
+ */
+
 import (
 	"bytes"
 	"encoding/json"
@@ -10,6 +16,32 @@ import (
 	"net/http/httptest"
 	"testing"
 )
+
+func TestFilteringByActive(t *testing.T) {
+	server, _, _, _ := setupServer()
+	ts := httptest.NewServer(server)
+	defer ts.Close()
+
+	_, _ = http.Post(ts.URL+"/user", "application/json", bytes.NewBufferString(`{"name":"Alan","active":true,"user_id":"3d90f0a3-7109-467a-a0d3-23cfb6fab793"}`))
+	_, _ = http.Post(ts.URL+"/user", "application/json", bytes.NewBufferString(`{"name":"Bob","active":false,"user_id":"cfe765b6-366e-4505-975c-a07dac76b2c3"}`))
+	_, _ = http.Post(ts.URL+"/user", "application/json", bytes.NewBufferString(`{"name":"Cindy","active":true,"user_id":"d87836ff-f360-4b4a-8511-9edaabcda80b"}`))
+	_, _ = http.Post(ts.URL+"/user", "application/json", bytes.NewBufferString(`{"name":"Dave","active":false,"user_id":"7cc4c5f9-c3e2-4778-b775-4ef94d2fc0a0"}`))
+
+	resp, err := http.Get(ts.URL + "/users?active=true")
+
+	assert.Nil(t, err)
+	assert.Equal(t, 200, resp.StatusCode)
+	assert.Equal(t, []string{"application/json; charset=utf-8"}, resp.Header["Content-Type"])
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	var users []models.User
+	assert.Nil(t, err)
+	err = json.Unmarshal(bodyBytes, &users)
+	assert.Nil(t, err)
+	assert.Contains(t, users, models.User{Name: "Alan", Active: true, UserID: "3d90f0a3-7109-467a-a0d3-23cfb6fab793"})
+	assert.Contains(t, users, models.User{Name: "Cindy", Active: true, UserID: "d87836ff-f360-4b4a-8511-9edaabcda80b"})
+	assert.NotContains(t, users, models.User{Name: "Bob", Active: false, UserID: "cfe765b6-366e-4505-975c-a07dac76b2c3"})
+	assert.NotContains(t, users, models.User{Name: "Dave", Active: false, UserID: "7cc4c5f9-c3e2-4778-b775-4ef94d2fc0a0"})
+}
 
 func TestAddingReadingAddDeleting(t *testing.T) {
 	server, _, _, _ := setupServer()
