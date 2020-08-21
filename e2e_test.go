@@ -72,9 +72,9 @@ func TestAddingReadingAddDeleting(t *testing.T) {
 	assert.Nil(t, err)
 	err = json.Unmarshal(bodyBytes, &user)
 	assert.Nil(t, err)
-	assert.Equal(t, user.Name, "Alan")
-	assert.Equal(t, user.Active, true)
-	assert.Equal(t, len(user.UserID), 36)
+	assert.Equal(t, "Alan", user.Name)
+	assert.Equal(t, true, user.Active)
+	assert.Equal(t, 36, len(user.UserID))
 
 	resp, err = http.Get(ts.URL + "/users")
 
