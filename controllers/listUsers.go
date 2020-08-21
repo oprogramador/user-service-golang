@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/oprogramador/user-service-golang/datamanagerinterfaces"
+	"github.com/oprogramador/user-service-golang/models"
 	"log"
 	"strconv"
 )
@@ -10,12 +11,23 @@ import (
 func ListUsers(userManager datamanagerinterfaces.UserManager) func(ginContext *gin.Context) {
 	return func(ginContext *gin.Context) {
 		query := ginContext.Request.URL.Query()
-		active, err := strconv.ParseBool(query["active"][0])
-		if err != nil {
-			log.Println(err)
-			ginContext.String(500, "")
+		queryActive := query["active"]
+		userManagerQuery := map[string]interface{}(nil)
+		if len(queryActive) > 0 {
+			active, err := strconv.ParseBool(queryActive[0])
+			userManagerQuery = map[string]interface{}{"active": active}
+			if err != nil {
+				log.Println(err)
+				ginContext.String(500, "")
+			}
 		}
-		users, err := userManager.Find(map[string]interface{}{"active": active})
+		var err error
+		var users []models.User
+		if userManagerQuery == nil {
+			users, err = userManager.Find()
+		} else {
+			users, err = userManager.Find(userManagerQuery)
+		}
 		if err != nil {
 			log.Println(err)
 			ginContext.String(500, "")
