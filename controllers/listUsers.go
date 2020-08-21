@@ -15,11 +15,12 @@ func ListUsers(userManager datamanagerinterfaces.UserManager) func(ginContext *g
 		userManagerQuery := map[string]interface{}(nil)
 		if len(queryActive) > 0 {
 			active, err := strconv.ParseBool(queryActive[0])
-			userManagerQuery = map[string]interface{}{"active": active}
 			if err != nil {
 				log.Println(err)
-				ginContext.String(500, "")
+				ginContext.String(400, "'active' param in the query string should be of type bool")
+				return
 			}
+			userManagerQuery = map[string]interface{}{"active": active}
 		}
 		var err error
 		var users []models.User
@@ -31,6 +32,7 @@ func ListUsers(userManager datamanagerinterfaces.UserManager) func(ginContext *g
 		if err != nil {
 			log.Println(err)
 			ginContext.String(500, "")
+			return
 		}
 		ginContext.JSON(200, users)
 	}

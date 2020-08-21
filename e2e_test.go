@@ -17,6 +17,20 @@ import (
 	"testing"
 )
 
+func TestHandlingInvalidActive(t *testing.T) {
+	server, _, _, _ := setupServer()
+	ts := httptest.NewServer(server)
+	defer ts.Close()
+
+	resp, err := http.Get(ts.URL + "/users?active=123")
+
+	assert.Nil(t, err)
+	assert.Equal(t, 400, resp.StatusCode)
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	assert.Nil(t, err)
+	assert.Equal(t, "'active' param in the query string should be of type bool", string(bodyBytes))
+}
+
 func TestFilteringByActive(t *testing.T) {
 	server, _, _, _ := setupServer()
 	ts := httptest.NewServer(server)

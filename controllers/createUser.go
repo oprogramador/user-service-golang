@@ -26,6 +26,7 @@ func CreateUser(userManager datamanagerinterfaces.UserManager) func(ginContext *
 		if err != nil {
 			log.Println(err)
 			ginContext.String(500, "")
+			return
 		}
 		ginContext.JSON(201, user)
 	}
