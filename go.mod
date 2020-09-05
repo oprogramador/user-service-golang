@@ -3,6 +3,7 @@ module github.com/oprogramador/user-service-golang
 go 1.13
 
 require (
+	github.com/franela/goblin v0.0.0-20200825194134-80c0062ed6cd
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-playground/validator/v10 v10.3.0 // indirect
 	github.com/golangci/golangci-lint v1.30.0 // indirect
