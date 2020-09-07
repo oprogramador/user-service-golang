@@ -101,8 +101,8 @@ func Test(t *testing.T) {
 
 		g.It("finds all users", func() {
 			_, err := usersCollection.InsertMany(ctx, []interface{}{
-				bson.M{"name": "Alan", "active": true, "user_id": "d9dfc0c3-2bc4-4166-ba86-c7cc2818d554"},
-				bson.M{"name": "Bob", "active": false, "user_id": "a046585f-f629-4c32-8ab9-e27d2cefd566"},
+				bson.M{"name": "Alan", "active": true, "user_id": "user-1"},
+				bson.M{"name": "Bob", "active": false, "user_id": "user-2"},
 			})
 			assert.Nil(t, err)
 
@@ -110,8 +110,8 @@ func Test(t *testing.T) {
 
 			assert.Nil(t, err)
 			assert.Equal(t, []models.User{
-				models.User{Name: "Alan", Active: true, UserID: "d9dfc0c3-2bc4-4166-ba86-c7cc2818d554"},
-				models.User{Name: "Bob", Active: false, UserID: "a046585f-f629-4c32-8ab9-e27d2cefd566"},
+				models.User{Name: "Alan", Active: true, UserID: "user-1"},
+				models.User{Name: "Bob", Active: false, UserID: "user-2"},
 			}, results)
 		})
 
@@ -124,10 +124,10 @@ func Test(t *testing.T) {
 
 		g.It("filters by active", func() {
 			_, err := usersCollection.InsertMany(ctx, []interface{}{
-				bson.M{"name": "Alan", "active": true, "user_id": "d9dfc0c3-2bc4-4166-ba86-c7cc2818d554"},
-				bson.M{"name": "Bob", "active": false, "user_id": "a046585f-f629-4c32-8ab9-e27d2cefd566"},
-				bson.M{"name": "Cindy", "active": true, "user_id": "bffb99c8-655b-47ff-9513-70eac0d4d3f4"},
-				bson.M{"name": "Dave", "active": false, "user_id": "0e459353-fe00-4a21-a3ff-3524f5f6f616"},
+				bson.M{"name": "Alan", "active": true, "user_id": "user-1"},
+				bson.M{"name": "Bob", "active": false, "user_id": "user-2"},
+				bson.M{"name": "Cindy", "active": true, "user_id": "user-3"},
+				bson.M{"name": "Dave", "active": false, "user_id": "user-4"},
 			})
 			assert.Nil(t, err)
 
@@ -135,8 +135,8 @@ func Test(t *testing.T) {
 
 			assert.Nil(t, err)
 			assert.Equal(t, []models.User{
-				models.User{Name: "Alan", Active: true, UserID: "d9dfc0c3-2bc4-4166-ba86-c7cc2818d554"},
-				models.User{Name: "Cindy", Active: true, UserID: "bffb99c8-655b-47ff-9513-70eac0d4d3f4"},
+				models.User{Name: "Alan", Active: true, UserID: "user-1"},
+				models.User{Name: "Cindy", Active: true, UserID: "user-3"},
 			}, results)
 		})
 	})
