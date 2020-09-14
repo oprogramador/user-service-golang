@@ -23,7 +23,11 @@ func setupServer() (*gin.Engine, context.CancelFunc, *mongo.Client, context.Cont
 	if err != nil {
 		log.Fatal(err)
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), config.GetTimeout())
+	timeout, err := config.GetTimeout()
+	if err != nil {
+		log.Fatal(err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	err = client.Connect(ctx)
 	if err != nil {
 		log.Fatal(err)
