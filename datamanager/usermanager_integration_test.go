@@ -24,12 +24,12 @@ func Test(t *testing.T) {
 		g.BeforeEach(func() {
 			client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
 			if err != nil {
-				log.Fatal(err)
+				log.Fatalln(err)
 			}
 			ctx, cancel = context.WithTimeout(context.Background(), 120*time.Second)
 			err = client.Connect(ctx)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatalln(err)
 			}
 
 			usersDatabase := client.Database("users")
