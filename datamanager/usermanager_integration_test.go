@@ -47,10 +47,14 @@ func Test(t *testing.T) {
 		})
 
 		g.It("saves with custom id", func() {
+			// GIVEN
 			id := "c81dc894-3d59-4f02-b22b-d4ad2cba0610"
 			user := models.User{Name: "Alan", Active: true, UserID: id}
+
+			// WHEN
 			err := userManager.Save(&user)
 
+			// THEN
 			assert.Nil(t, err)
 			assert.Equal(t, "Alan", user.Name)
 			assert.Equal(t, true, user.Active)
@@ -63,9 +67,13 @@ func Test(t *testing.T) {
 		})
 
 		g.It("saves without custom id", func() {
+			// GIVEN
 			user := models.User{Name: "Alan", Active: true}
+
+			// WHEN
 			err := userManager.Save(&user)
 
+			// THEN
 			assert.Nil(t, err)
 			assert.Equal(t, "Alan", user.Name)
 			assert.Equal(t, true, user.Active)
@@ -78,12 +86,15 @@ func Test(t *testing.T) {
 		})
 
 		g.It("deletes existent user", func() {
+			// GIVEN
 			id := "d9dfc0c3-2bc4-4166-ba86-c7cc2818d554"
 			_, err := usersCollection.InsertOne(ctx, bson.M{"name": "Alan", "active": true, "user_id": id})
 			assert.Nil(t, err)
 
+			// WHEN
 			err = userManager.Delete(id)
 
+			// THEN
 			assert.Nil(t, err)
 			var saved models.User
 			err = usersCollection.FindOne(ctx, bson.M{"user_id": id}).Decode(&saved)
@@ -92,22 +103,28 @@ func Test(t *testing.T) {
 		})
 
 		g.It("deletes non-existent user", func() {
+			// GIVEN
 			id := "non-existent"
 
+			// WHEN
 			err := userManager.Delete(id)
 
+			// THEN
 			assert.Nil(t, err)
 		})
 
 		g.It("finds all users", func() {
+			// GIVEN
 			_, err := usersCollection.InsertMany(ctx, []interface{}{
 				bson.M{"name": "Alan", "active": true, "user_id": "user-1"},
 				bson.M{"name": "Bob", "active": false, "user_id": "user-2"},
 			})
 			assert.Nil(t, err)
 
+			// WHEN
 			results, err := userManager.Find()
 
+			// THEN
 			assert.Nil(t, err)
 			assert.Equal(t, []models.User{
 				models.User{Name: "Alan", Active: true, UserID: "user-1"},
@@ -116,13 +133,16 @@ func Test(t *testing.T) {
 		})
 
 		g.It("finds empty list of users", func() {
+			// WHEN
 			results, err := userManager.Find()
 
+			// THEN
 			assert.Nil(t, err)
 			assert.Equal(t, []models.User{}, results)
 		})
 
 		g.It("filters by active", func() {
+			// GIVEN
 			_, err := usersCollection.InsertMany(ctx, []interface{}{
 				bson.M{"name": "Alan", "active": true, "user_id": "user-1"},
 				bson.M{"name": "Bob", "active": false, "user_id": "user-2"},
@@ -131,8 +151,10 @@ func Test(t *testing.T) {
 			})
 			assert.Nil(t, err)
 
+			// WHEN
 			results, err := userManager.Find(map[string]interface{}{"active": true})
 
+			// THEN
 			assert.Nil(t, err)
 			assert.Equal(t, []models.User{
 				models.User{Name: "Alan", Active: true, UserID: "user-1"},
