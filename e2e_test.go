@@ -10,6 +10,7 @@ import (
 	"bytes"
 	"encoding/json"
 	. "github.com/franela/goblin"
+	"github.com/google/uuid"
 	"github.com/oprogramador/user-service-golang/models"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
@@ -43,11 +44,19 @@ func Test(t *testing.T) {
 			server, _, _, _ := setupServer()
 			ts := httptest.NewServer(server)
 			defer ts.Close()
+			id1, err := uuid.NewRandom()
+			assert.Nil(t, err)
+			id2, err := uuid.NewRandom()
+			assert.Nil(t, err)
+			id3, err := uuid.NewRandom()
+			assert.Nil(t, err)
+			id4, err := uuid.NewRandom()
+			assert.Nil(t, err)
 
-			_, _ = http.Post(ts.URL+"/user", "application/json", bytes.NewBufferString(`{"name":"Alan","active":true,"user_id":"user-1"}`))
-			_, _ = http.Post(ts.URL+"/user", "application/json", bytes.NewBufferString(`{"name":"Bob","active":false,"user_id":"user-2"}`))
-			_, _ = http.Post(ts.URL+"/user", "application/json", bytes.NewBufferString(`{"name":"Cindy","active":true,"user_id":"user-3"}`))
-			_, _ = http.Post(ts.URL+"/user", "application/json", bytes.NewBufferString(`{"name":"Dave","active":false,"user_id":"user-4"}`))
+			_, _ = http.Post(ts.URL+"/user", "application/json", bytes.NewBufferString(`{"name":"Alan","active":true,"user_id":"`+id1.String()+`"}`))
+			_, _ = http.Post(ts.URL+"/user", "application/json", bytes.NewBufferString(`{"name":"Bob","active":false,"user_id":"`+id2.String()+`"}`))
+			_, _ = http.Post(ts.URL+"/user", "application/json", bytes.NewBufferString(`{"name":"Cindy","active":true,"user_id":"`+id3.String()+`"}`))
+			_, _ = http.Post(ts.URL+"/user", "application/json", bytes.NewBufferString(`{"name":"Dave","active":false,"user_id":"`+id4.String()+`"}`))
 
 			// WHEN
 			resp, err := http.Get(ts.URL + "/users?active=true")
@@ -61,10 +70,10 @@ func Test(t *testing.T) {
 			assert.Nil(t, err)
 			err = json.Unmarshal(bodyBytes, &users)
 			assert.Nil(t, err)
-			assert.Contains(t, users, models.User{Name: "Alan", Active: true, UserID: "user-1"})
-			assert.Contains(t, users, models.User{Name: "Cindy", Active: true, UserID: "user-3"})
-			assert.NotContains(t, users, models.User{Name: "Bob", Active: false, UserID: "user-2"})
-			assert.NotContains(t, users, models.User{Name: "Dave", Active: false, UserID: "user-4"})
+			assert.Contains(t, users, models.User{Name: "Alan", Active: true, UserID: id1.String()})
+			assert.Contains(t, users, models.User{Name: "Cindy", Active: true, UserID: id3.String()})
+			assert.NotContains(t, users, models.User{Name: "Bob", Active: false, UserID: id2.String()})
+			assert.NotContains(t, users, models.User{Name: "Dave", Active: false, UserID: id4.String()})
 		})
 
 		g.It("adds, reads and deletes", func() {
