@@ -14,23 +14,23 @@ import (
 func disconnect(client *mongo.Client, ctx context.Context) {
 	err := client.Disconnect(ctx)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln(err)
 	}
 }
 
 func setupServer() (*gin.Engine, context.CancelFunc, *mongo.Client, context.Context) {
 	client, err := mongo.NewClient(options.Client().ApplyURI(config.GetMongoURL()))
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln(err)
 	}
 	timeout, err := config.GetTimeout()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln(err)
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	err = client.Connect(ctx)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln(err)
 	}
 
 	usersDatabase := client.Database("users")
