@@ -8,3 +8,6 @@ run `go run server.go`
 
 ## test
 run `go test -v ./...`
+
+## license
+MIT
